@@ -1,7 +1,11 @@
 /* @flow */
 
-import { inBrowser } from 'core/util/env'
-import { makeMap } from 'shared/util'
+import {
+  inBrowser
+} from 'core/util/env'
+import {
+  makeMap
+} from 'shared/util'
 
 export const namespaceMap = {
   svg: 'http://www.w3.org/2000/svg',
@@ -22,25 +26,15 @@ export const isHTMLTag = makeMap(
   'content,element,shadow,template,blockquote,iframe,tfoot'
 )
 
-// this map is intentionally selective, only covering SVG elements that may
-// contain child elements.
-export const isSVG = makeMap(
-  'svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
-  'foreignObject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
-  'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view',
-  true
-)
 
-export const isPreTag = (tag: ?string): boolean => tag === 'pre'
+export const isPreTag = (tag: ? string): boolean => tag === 'pre'
 
-export const isReservedTag = (tag: string): ?boolean => {
-  return isHTMLTag(tag) || isSVG(tag)
+export const isReservedTag = (tag: string): ? boolean => {
+  return isHTMLTag(tag);
 }
 
-export function getTagNamespace (tag: string): ?string {
-  if (isSVG(tag)) {
-    return 'svg'
-  }
+export function getTagNamespace(tag: string): ? string {
+
   // basic support for MathML
   // note it doesn't support other MathML elements being component roots
   if (tag === 'math') {
@@ -49,7 +43,7 @@ export function getTagNamespace (tag: string): ?string {
 }
 
 const unknownElementCache = Object.create(null)
-export function isUnknownElement (tag: string): boolean {
+export function isUnknownElement(tag: string) : boolean {
   /* istanbul ignore if */
   if (!inBrowser) {
     return true

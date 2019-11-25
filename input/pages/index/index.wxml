@@ -1,0 +1,7 @@
+<!--index.wxml-->
+<view class="container">
+  <button bindtap="bindBtnTap"> 跳转 </button>
+  <view class="counter-wrap">
+    <counter/>
+  </view>
+</view>

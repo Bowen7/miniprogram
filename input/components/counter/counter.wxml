@@ -1,0 +1,3 @@
+<!--components/counter/counter.wxml-->
+<view class="count">{{count}}</view>
+<button class="btn" type="primary" bindtap='handleBtnTap'>add</button>

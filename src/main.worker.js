@@ -1,5 +1,8 @@
+onmessage = function (e) {
+  console.log('Message received from main script')
+  console.log(e)
+}
 import Vue from "vue"
-import Worker from "./main.worker.js"
 const com = {
   template: '<view>456<button v-on:click="handleClick">click</button></view>',
   methods: {
@@ -23,8 +26,3 @@ const app = new Vue({
     }
   }
 })
-const worker = new Worker();
-worker.postMessage({
-  a: 1
-});
-console.log(app)
