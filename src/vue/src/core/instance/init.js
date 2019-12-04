@@ -87,7 +87,7 @@ export function initMixin(Vue: Class < Component > ) {
     }
 
     if (vm.$options.el) {
-      // vm.$mount(vm.$options.el)
+      vm.$mount(vm.$options.el)
     }
   }
 }
