@@ -14,6 +14,17 @@ const source = `Page({
   }
 })
 `;
+const pageHooksHash = {
+	onLoad: "created",
+	onReady: "mounted",
+	onUnload: "destroyed"
+};
+const componentHooksHash = {
+	created: "created",
+	attached: "beforeMount",
+	ready: "mounted",
+	detached: "destroyed"
+};
 function convertData(data) {}
 function convertMethods(methods) {}
 function convertHooks(hooks) {}
