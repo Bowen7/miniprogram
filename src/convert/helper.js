@@ -1,5 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const parser = require('@babel/parser');
+const generate = require('@babel/generator')['default'];
+const traverse = require('@babel/traverse')['default'];
+const t = require('@babel/types');
 const h = {};
 h.convertPath = (filePath, type) => {
   const pathObj = path.parse(filePath);
@@ -10,6 +14,9 @@ h.convertPath = (filePath, type) => {
     case 'style':
       pathObj.ext = '.wxss';
       break;
+    case 'script':
+      pathObj.ext = '.js';
+      break;
     case 'json':
       pathObj.ext = '.json';
       break;
@@ -19,101 +26,44 @@ h.convertPath = (filePath, type) => {
   pathObj.base = '';
   return path.format(pathObj);
 };
-h.getPages = jsonPath => {
-  let content = fs.readFileSync(jsonPath).toString();
+h.convertFile = (filePath, type) => {
+  filePath = h.convertPath(filePath, type);
+  return fs.readFileSync(filePath).toString();
+};
+h.getPagesString = content => {
+  console.log(content);
   content = JSON.parse(content);
+  const pages = content.pages || [];
+  let requires = '';
+  let routes = '';
+  pages.forEach((page, index) => {
+    const pageName = `__Page__${index}__`;
+    requires += `import ${pageName} from './${page}.wxml';\n`;
+    if (index === 0) {
+      routes += `{ path: "/", redirect: '/${page}' },\n`;
+    }
+    routes += `{ path: "/${page}", component: ${pageName} },\n`;
+  });
+  return `${requires}\nconst routes=[${routes}]`;
 };
-h.fileExist = path => {
-  try {
-    fs.accessSync(path, fs.constants.R_OK);
-    return true;
-  } catch (err) {
-    return false;
-  }
-};
-h.getFiles = (curPath, rootPath, isApp = false) => {
-  const wxmlPath = curPath + '.wxml';
-  const wxssPath = curPath + '.wxss';
-  const jsonPath = curPath + '.json';
-  const jsPath = curPath + '.js';
-  // json和js必须存在
-  // wxml除app必须存在
-  // wxss可不存在
-  if (!h.fileExist(wxmlPath) && !isApp) {
-    console.error(`${wxmlPath} not exist`);
-  }
-  if (!h.fileExist(jsonPath)) {
-    console.error(`${jsonPath} not exist`);
-  }
-  if (!h.fileExist(jsPath)) {
-    console.error(`${jsPath} not exist`);
-  }
-  const files = {
-    json: jsonPath,
-    js: jsPath
-  };
-  if (h.fileExist(wxmlPath)) {
-    files.wxml = wxmlPath;
-  }
-  if (h.fileExist(wxssPath)) {
-    files.wxss = wxssPath;
-  }
-  let jsonContent = {};
-  try {
-    jsonContent = JSON.parse(fs.readFileSync(jsonPath));
-  } catch (error) {
-    console.error(`${jsonPath}: json parse error`);
-  }
-  const components = [];
-  if (isApp) {
-    jsonContent.pages &&
-      jsonContent.pages.forEach(item => {
-        if (path.isAbsolute(item)) {
-          components.push(path.join(rootPath, item));
-        } else {
-          components.push(path.join(path.dirname(curPath), item));
-        }
-      });
-  } else {
-    const usingComponents = jsonContent.usingComponents;
-    if (usingComponents) {
-      for (let key in usingComponents) {
-        const comPath = usingComponents[key];
-        if (path.isAbsolute(comPath)) {
-          components.push(path.join(rootPath, comPath));
-        } else {
-          components.push(path.join(path.dirname(curPath), comPath));
-        }
+h.convertJs = content => {
+  const ast = parser.parse(content, {
+    sourceType: 'module'
+  });
+  let _callPath;
+  traverse(ast, {
+    CallExpression(callPath) {
+      const callee = callPath.get('callee');
+      const name = callee.node.name;
+      if (name === 'Page' || name === 'Component') {
+        _callPath = callPath;
       }
     }
+  });
+  if (_callPath) {
+    const exportDefaultDc = t.exportDefaultDeclaration(_callPath.node);
+    _callPath.parentPath.replaceWith(exportDefaultDc);
   }
-  files.components = components;
-  return files;
-};
-h.getFileHash = rootPath => {
-  const fileHash = {
-    app: {},
-    pages: {},
-    components: {}
-  };
-  const stack = [path.join(rootPath, './app')];
-  let isApp = true;
-  while (stack.length > 0) {
-    const cur = stack.pop();
-    if (fileHash[cur]) {
-      continue;
-    }
-    const files = h.getFiles(cur, rootPath, isApp);
-    if (isApp) {
-      fileHash.app = files;
-      isApp = false;
-    } else if (~fileHash.app.components.indexOf(cur)) {
-      fileHash.pages[cur] = files;
-    } else {
-      fileHash.components[cur] = files;
-    }
-    stack.push(...files.components);
-  }
-  return fileHash;
+  return generate(ast).code;
 };
 module.exports = h;

@@ -8,7 +8,7 @@
     "dev": "webpack-dev-server --open",
     "build:web": "webpack --config vue.web.webpack.config.js",
     "convert": "node ./src/convert",
-    "wx": "webpack --config wx.webpack.config.js"
+    "wx": "webpack-dev-server --open --config wx.webpack.config.js"
   },
   "author": "",
   "license": "ISC",
