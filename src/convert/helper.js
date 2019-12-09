@@ -1,21 +1,43 @@
-const fs = require("fs");
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 const h = {};
-h.fileExist = (path) => {
+h.convertPath = (filePath, type) => {
+  const pathObj = path.parse(filePath);
+  switch (type) {
+    case 'template':
+      pathObj.ext = '.wxml';
+      break;
+    case 'style':
+      pathObj.ext = '.wxss';
+      break;
+    case 'json':
+      pathObj.ext = '.json';
+      break;
+    default:
+      break;
+  }
+  pathObj.base = '';
+  return path.format(pathObj);
+};
+h.getPages = jsonPath => {
+  let content = fs.readFileSync(jsonPath).toString();
+  content = JSON.parse(content);
+};
+h.fileExist = path => {
   try {
     fs.accessSync(path, fs.constants.R_OK);
     return true;
   } catch (err) {
     return false;
   }
-}
+};
 h.getFiles = (curPath, rootPath, isApp = false) => {
   const wxmlPath = curPath + '.wxml';
   const wxssPath = curPath + '.wxss';
   const jsonPath = curPath + '.json';
   const jsPath = curPath + '.js';
-  // json和js必须存在 
-  // wxml除app必须存在 
+  // json和js必须存在
+  // wxml除app必须存在
   // wxss可不存在
   if (!h.fileExist(wxmlPath) && !isApp) {
     console.error(`${wxmlPath} not exist`);
@@ -28,7 +50,7 @@ h.getFiles = (curPath, rootPath, isApp = false) => {
   }
   const files = {
     json: jsonPath,
-    js: jsPath,
+    js: jsPath
   };
   if (h.fileExist(wxmlPath)) {
     files.wxml = wxmlPath;
@@ -36,7 +58,7 @@ h.getFiles = (curPath, rootPath, isApp = false) => {
   if (h.fileExist(wxssPath)) {
     files.wxss = wxssPath;
   }
-  let jsonContent = {}
+  let jsonContent = {};
   try {
     jsonContent = JSON.parse(fs.readFileSync(jsonPath));
   } catch (error) {
@@ -44,13 +66,14 @@ h.getFiles = (curPath, rootPath, isApp = false) => {
   }
   const components = [];
   if (isApp) {
-    jsonContent.pages && jsonContent.pages.forEach(item => {
-      if (path.isAbsolute(item)) {
-        components.push(path.join(rootPath, item));
-      } else {
-        components.push(path.join(path.dirname(curPath), item));
-      }
-    });
+    jsonContent.pages &&
+      jsonContent.pages.forEach(item => {
+        if (path.isAbsolute(item)) {
+          components.push(path.join(rootPath, item));
+        } else {
+          components.push(path.join(path.dirname(curPath), item));
+        }
+      });
   } else {
     const usingComponents = jsonContent.usingComponents;
     if (usingComponents) {
@@ -66,8 +89,8 @@ h.getFiles = (curPath, rootPath, isApp = false) => {
   }
   files.components = components;
   return files;
-}
-h.getFileHash = (rootPath) => {
+};
+h.getFileHash = rootPath => {
   const fileHash = {
     app: {},
     pages: {},
@@ -92,5 +115,5 @@ h.getFileHash = (rootPath) => {
     stack.push(...files.components);
   }
   return fileHash;
-}
+};
 module.exports = h;

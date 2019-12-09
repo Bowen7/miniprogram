@@ -3,26 +3,27 @@ onmessage = function (e) {
   console.log(e)
 }
 import Vue from "vue"
-const com = {
-  template: '<view>456<button v-on:click="handleClick">click</button></view>',
-  methods: {
-    handleClick() {
-      this.$emit('myEvent')
-    }
-  }
-}
-const app = new Vue({
-  components: {
-    com
+import VueRouter from "vue-router";
+Vue.use(VueRouter);
+import App from "./source.vue";
+import com from "./com.vue";
+const routes = [{
+    path: "/",
+    redirect: "/foo"
   },
-  template: '<view><com v-on:myEvent="doSomething"/></view>',
-  el: '#app',
-  data: {
-    message: 'Hello Vue!'
+  {
+    path: "/foo",
+    component: App
   },
-  methods: {
-    doSomething() {
-      console.log(this.message)
-    }
+  {
+    path: "/bar",
+    component: com
   }
-})
+];
+const router = new VueRouter({
+  routes
+});
+new Vue({
+  router,
+  template: `<router-view></router-view>`
+}).$mount("#app");

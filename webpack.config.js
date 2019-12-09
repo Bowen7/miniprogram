@@ -27,6 +27,10 @@ module.exports = {
         }
       },
       {
+        test: /\.vu$/,
+        loader: "vue-loader"
+      },
+      {
         test: /\.vue$/,
         loader: "vue-loader"
       }
@@ -40,7 +44,7 @@ module.exports = {
       compiler: path.resolve("src/vue/src/compiler"),
       server: path.resolve("src/vue/src/server"),
       sfc: path.resolve("src/vue/src/sfc"),
-      vue: path.resolve("src/vue/src/platforms/web/entry-runtime")
+      vue: path.resolve("src/vue/src/platforms/web/entry-runtime-with-compiler")
     }
   },
   devServer: {
