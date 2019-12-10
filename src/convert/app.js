@@ -1,8 +1,9 @@
 const path = require('path');
 const fs = require('fs');
-const entryFile = 'app.js';
 const h = require('./helper');
 const template = require('./template');
+
+const entryFile = 'app.js';
 
 module.exports = function(source) {
   const { resourcePath } = this;

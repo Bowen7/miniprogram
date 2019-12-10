@@ -1,8 +1,13 @@
 const h = require('./helper');
 module.exports = function(source) {
   const { resourcePath } = this;
-  const jsContent = h.convertFile(resourcePath, 'script');
-  // console.log(h.convertJs(jsContent));
+  const json = JSON.parse(h.convertFile(resourcePath, 'json'));
+  const { usingComponents = {} } = json;
+  console.log(usingComponents);
+
+  const js = h.convertFile(resourcePath, 'script');
+  const template = h.convertFile(resourcePath, 'template');
+  const style = h.convertFile(resourcePath, 'style');
   return `
 <template>
   <div>123</div>
@@ -10,13 +15,17 @@ module.exports = function(source) {
 
 <script>
 export default Page({
-  name: "Test",
-  components: {},
-  data: function() {
-    return {};
+  properties: {
   },
-  mounted() {
-    console.log(this.$options._scopeId, this._uid);
+  data(){
+    return {
+      count: 0
+    }
+  },
+  methods: {
+  },
+  onReady() {
+    console.log('created')
   }
 });
 </script>

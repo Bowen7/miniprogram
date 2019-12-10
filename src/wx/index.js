@@ -1,5 +1,4 @@
+import Page from './page';
+import Component from './component';
 export const wx = obj => {};
-export const Page = obj => {
-  return obj;
-};
-export const Componet = () => {};
+export { Page, Component };

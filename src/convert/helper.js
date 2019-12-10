@@ -27,8 +27,12 @@ h.convertPath = (filePath, type) => {
   return path.format(pathObj);
 };
 h.convertFile = (filePath, type) => {
-  filePath = h.convertPath(filePath, type);
-  return fs.readFileSync(filePath).toString();
+  try {
+    filePath = h.convertPath(filePath, type);
+    return fs.readFileSync(filePath).toString();
+  } catch (error) {
+    return '';
+  }
 };
 h.getPagesString = content => {
   console.log(content);
