@@ -1,8 +1,9 @@
 const path = require('path');
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const { entryPath } = require('./config');
 module.exports = {
-  entry: './input/app.js',
+  entry: entryPath,
   mode: 'development',
   output: {
     path: path.resolve(__dirname, 'output'),
@@ -10,6 +11,10 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        use: ['vue-style-loader', 'css-loader']
+      },
       {
         test: /\.js$/,
         exclude: /(node_modules)/,

@@ -10,6 +10,7 @@ module.exports = function(source) {
   if (path.basename(resourcePath) !== entryFile) {
     return source;
   }
+
   const jsonContent = h.convertFile(resourcePath, 'json');
   const pagesString = h.getPagesString(jsonContent);
   const app = template.buildApp(pagesString);

@@ -4,6 +4,7 @@ const parser = require('@babel/parser');
 const generate = require('@babel/generator')['default'];
 const traverse = require('@babel/traverse')['default'];
 const t = require('@babel/types');
+const { entryPath } = require('../../config');
 const h = {};
 h.convertPath = (filePath, type) => {
   const pathObj = path.parse(filePath);
@@ -50,7 +51,17 @@ h.getPagesString = content => {
   });
   return `${requires}\nconst routes=[${routes}]`;
 };
-h.convertJs = content => {
+h.convertJs = (content, components) => {
+  const componentsProperties = [];
+  components.forEach((component, index) => {
+    const { name, comPath } = component;
+    componentAliasName = `__Component__${index}__`;
+    content = `import ${componentAliasName} from '${comPath}';` + content;
+    componentsProperties.push(
+      t.objectProperty(t.identifier(name), t.identifier(componentAliasName))
+    );
+  });
+
   const ast = parser.parse(content, {
     sourceType: 'module'
   });
@@ -60,6 +71,15 @@ h.convertJs = content => {
       const callee = callPath.get('callee');
       const name = callee.node.name;
       if (name === 'Page' || name === 'Component') {
+        const args = callPath.get('arguments');
+        if (args.length > 0) {
+          const props = args[0].node.properties;
+          const componentsProp = t.objectProperty(
+            t.identifier('components'),
+            t.objectExpression(componentsProperties)
+          );
+          props.unshift(componentsProp);
+        }
         _callPath = callPath;
       }
     }
@@ -69,5 +89,23 @@ h.convertJs = content => {
     _callPath.parentPath.replaceWith(exportDefaultDc);
   }
   return generate(ast).code;
+};
+// 要绑定this使用
+h.convertUsingComponents = function(usingComponents) {
+  const { rootContext, context } = this;
+  const components = [];
+  for (let name in usingComponents) {
+    let comPath = usingComponents[name];
+    if (path.isAbsolute(comPath)) {
+      const entryAbsolutePath = path.dirname(path.join(rootContext, entryPath));
+      const comAbsolutePath = path.join(entryAbsolutePath, comPath);
+      comPath = path.relative(context, comAbsolutePath);
+    }
+    components.push({
+      name,
+      comPath: comPath
+    });
+  }
+  return components;
 };
 module.exports = h;
