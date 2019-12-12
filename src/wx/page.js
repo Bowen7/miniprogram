@@ -9,7 +9,8 @@ const Page = pageOptions => {
     const item = pageOptions[key];
     switch (key) {
       case 'data':
-        options.data = item;
+      case 'components':
+        options[key] = item;
         break;
 
       default:

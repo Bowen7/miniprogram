@@ -10,10 +10,9 @@ const Component = comOptions => {
     const item = comOptions[key];
     switch (key) {
       case 'data':
-        options.data = item;
-        break;
       case 'methods':
-        options.methods = item;
+      case 'components':
+        options[key] = item;
         break;
       case 'properties':
         for (let propKey in item) {

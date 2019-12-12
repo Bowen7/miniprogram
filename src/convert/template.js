@@ -6,20 +6,24 @@ template.buildApp = pageString => {
 import Vue from "vue";
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
+const App = {
+  render: c => {
+    return c('router-view', '');
+  }
+}
 ${pageString}
 const router = new VueRouter({
   routes
 });
 new Vue({
   router,
-  template: '<router-view></router-view>'
+  render: h => h(App)
 }).$mount("#app");
   `;
 };
 
 template.buildComponent = (template, script, style, components) => {
   script = h.convertJs(script, components);
-  console.log(script);
   return `
 <template>
   ${template}

@@ -56,7 +56,7 @@ h.convertJs = (content, components) => {
   components.forEach((component, index) => {
     const { name, comPath } = component;
     componentAliasName = `__Component__${index}__`;
-    content = `import ${componentAliasName} from '${comPath}';` + content;
+    content = `import ${componentAliasName} from '${comPath}.wxml';` + content;
     componentsProperties.push(
       t.objectProperty(t.identifier(name), t.identifier(componentAliasName))
     );

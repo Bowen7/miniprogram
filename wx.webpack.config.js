@@ -53,7 +53,7 @@ module.exports = {
       compiler: path.resolve('src/vue/src/compiler'),
       server: path.resolve('src/vue/src/server'),
       sfc: path.resolve('src/vue/src/sfc'),
-      vue: path.resolve('src/vue/src/platforms/web/entry-runtime-with-compiler')
+      vue: path.resolve('src/vue/src/platforms/web/entry-runtime')
     }
   },
   devServer: {
