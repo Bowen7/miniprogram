@@ -4,17 +4,19 @@
   "description": "浏览器端实现微信小程序",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "",
     "dev": "webpack-dev-server --open",
     "build:web": "webpack --config vue.web.webpack.config.js",
     "convert": "node ./src/convert",
-    "wx": "webpack-dev-server --open --config wx.webpack.config.js"
+    "wx": "webpack-dev-server --open --config wx.webpack.config.js",
+    "compiler": "webpack-dev-server --open --config compiler.webpack.config.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.6",
     "@babel/preset-flow": "^7.0.0",
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
@@ -33,7 +35,6 @@
     "@babel/traverse": "^7.7.4",
     "@babel/types": "^7.7.4",
     "he": "^1.2.0",
-    "loader-utils": "^1.2.3",
     "vue": "^2.6.10",
     "vue-router": "^3.1.3"
   }
