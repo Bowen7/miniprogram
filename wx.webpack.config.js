@@ -1,7 +1,7 @@
-const path = require('path');
-const webpack = require('webpack');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const { entryPath } = require('./config');
+const path = require('path')
+const webpack = require('webpack')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const { entryPath } = require('./config')
 module.exports = {
   entry: entryPath,
   mode: 'development',
@@ -53,7 +53,8 @@ module.exports = {
       compiler: path.resolve('src/vue/src/compiler'),
       server: path.resolve('src/vue/src/server'),
       sfc: path.resolve('src/vue/src/sfc'),
-      vue: path.resolve('src/vue/src/platforms/web/entry-runtime')
+      vue: path.resolve('src/vue/src/platforms/web/entry-runtime'),
+      'app-loader': path.resolve('src/convert/app.js')
     }
   },
   devServer: {
@@ -64,7 +65,12 @@ module.exports = {
     new webpack.ProvidePlugin({
       wx: [path.resolve(__dirname, 'src/wx'), 'wx'],
       Page: [path.resolve(__dirname, 'src/wx'), 'Page'],
-      Component: [path.resolve(__dirname, 'src/wx'), 'Component']
+      Component: [path.resolve(__dirname, 'src/wx'), 'Component'],
+      App: [path.resolve(__dirname, 'src/wx'), 'App'],
+      Vue: [
+        path.resolve(__dirname, 'src/vue/src/platforms/web/entry-runtime'),
+        'default'
+      ]
     })
   ]
-};
+}

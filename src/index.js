@@ -1,57 +1,48 @@
-// import Vue from "vue"
-import Worker from './main.worker.js';
-// const com = {
-//   template: '<div class="test">456<button v-on:click="handleClick">click</button></div>',
-//   methods: {
-//     handleClick() {
-//       this.$emit('myEvent')
-//     }
-//   }
-// }
-// const app = new Vue({
-//   components: {
-//     com
-//   },
-//   template: '<div><com v-on:myEvent="doSomething"/></div>',
-//   el: '#app',
-//   data: {
-//     message: 'Hello Vue!'
-//   },
-//   methods: {
-//     doSomething() {
-//       console.log(this.message)
-//     }
-//   }
-// })
-const worker = new Worker();
-worker.postMessage({
-  a: 1
-});
-// console.log(app)
-// import Vue from "./vue/src/platforms/web/entry-runtime-with-compiler";
-import Vue from '../dist/vue.web';
-import VueRouter from 'vue-router';
-Vue.use(VueRouter);
-import App from './source.vue';
-import com from './com.vue';
-const routes = [
-  {
-    path: '/',
-    redirect: '/foo'
+// import Worker from './main.worker.js';
+// const worker = new Worker();
+// worker.postMessage({
+//   a: 1
+// });
+import Vue from '../dist/vue.web'
+import source from './source.vue'
+import com from './com.vue'
+const routes = {
+  '/': { redirect: '/source' },
+  '/com': { component: com },
+  '/source': { component: source }
+}
+const App = {
+  data: function() {
+    return {
+      currentRoute: window.location.hash || '#/'
+    }
   },
-  {
-    path: '/foo',
-    component: App
+  computed: {
+    ViewComponent() {
+      const currentRoute = this.currentRoute.slice(1)
+      const { component, redirect } = routes[currentRoute]
+      return component ? component : routes[redirect].component
+    }
   },
-  {
-    path: '/bar',
-    component: com
+  watch: {
+    currentRoute: {
+      handler(newval) {
+        if (newval !== window.location.hash) {
+          window.location.hash = newval
+        }
+      },
+      immediate: true
+    }
+  },
+  beforeCreate() {
+    window.addEventListener('hashchange', e => {
+      this.currentRoute = window.location.hash
+    })
+  },
+  render(h) {
+    return h(this.ViewComponent)
   }
-];
-const router = new VueRouter({
-  routes
-});
+}
 new Vue({
-  router,
-  template: `<router-view></router-view>`
-}).$mount('#app');
+  render: h => h(App)
+}).$mount('#app')

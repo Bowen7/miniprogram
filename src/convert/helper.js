@@ -1,111 +1,113 @@
-const fs = require('fs');
-const path = require('path');
-const parser = require('@babel/parser');
-const generate = require('@babel/generator')['default'];
-const traverse = require('@babel/traverse')['default'];
-const t = require('@babel/types');
-const { entryPath } = require('../../config');
-const h = {};
+const fs = require('fs')
+const path = require('path')
+const parser = require('@babel/parser')
+const generate = require('@babel/generator')['default']
+const traverse = require('@babel/traverse')['default']
+const t = require('@babel/types')
+const { entryPath } = require('../../config')
+const h = {}
 h.convertPath = (filePath, type) => {
-  const pathObj = path.parse(filePath);
+  const pathObj = path.parse(filePath)
   switch (type) {
     case 'template':
-      pathObj.ext = '.wxml';
-      break;
+      pathObj.ext = '.wxml'
+      break
     case 'style':
-      pathObj.ext = '.wxss';
-      break;
+      pathObj.ext = '.wxss'
+      break
     case 'script':
-      pathObj.ext = '.js';
-      break;
+      pathObj.ext = '.js'
+      break
     case 'json':
-      pathObj.ext = '.json';
-      break;
+      pathObj.ext = '.json'
+      break
     default:
-      break;
+      break
   }
-  pathObj.base = '';
-  return path.format(pathObj);
-};
+  pathObj.base = ''
+  return path.format(pathObj)
+}
 h.convertFile = (filePath, type) => {
   try {
-    filePath = h.convertPath(filePath, type);
-    return fs.readFileSync(filePath).toString();
+    filePath = h.convertPath(filePath, type)
+    return fs.readFileSync(filePath).toString()
   } catch (error) {
-    return '';
+    return ''
   }
-};
+}
 h.getPagesString = content => {
-  console.log(content);
-  content = JSON.parse(content);
-  const pages = content.pages || [];
-  let requires = '';
-  let routes = '';
+  content = JSON.parse(content)
+  const pages = content.pages || []
+  let requires = ''
+  let routes = ''
   pages.forEach((page, index) => {
-    const pageName = `__Page__${index}__`;
-    requires += `import ${pageName} from './${page}.wxml';\n`;
+    const pageName = `__Page__${index}__`
+
+    requires += `import ${pageName} from './${page}.wxml';\n`
     if (index === 0) {
-      routes += `{ path: "/", redirect: '/${page}' },\n`;
+      routes += `"/": { redirect: '/${page}' },\n`
     }
-    routes += `{ path: "/${page}", component: ${pageName} },\n`;
-  });
-  return `${requires}\nconst routes=[${routes}]`;
-};
+    routes += `"/${page}": { component: ${pageName} },\n`
+  })
+  return `${requires}\nconst routes={${routes}}`
+}
 h.convertJs = (content, components) => {
-  const componentsProperties = [];
+  const componentsProperties = []
   components.forEach((component, index) => {
-    const { name, comPath } = component;
-    componentAliasName = `__Component__${index}__`;
-    content = `import ${componentAliasName} from '${comPath}.wxml';` + content;
+    const { name, comPath } = component
+    componentAliasName = `__Component__${index}__`
+    content =
+      `import ${componentAliasName} from '${comPath}.wxml';console.log(666, ${componentAliasName});` +
+      content
     componentsProperties.push(
       t.objectProperty(t.identifier(name), t.identifier(componentAliasName))
-    );
-  });
+    )
+  })
 
   const ast = parser.parse(content, {
     sourceType: 'module'
-  });
-  let _callPath;
+  })
+  let _callPath
   traverse(ast, {
     CallExpression(callPath) {
-      const callee = callPath.get('callee');
-      const name = callee.node.name;
+      const callee = callPath.get('callee')
+      const name = callee.node.name
       if (name === 'Page' || name === 'Component') {
-        const args = callPath.get('arguments');
+        const args = callPath.get('arguments')
         if (args.length > 0) {
-          const props = args[0].node.properties;
+          const props = args[0].node.properties
           const componentsProp = t.objectProperty(
             t.identifier('components'),
             t.objectExpression(componentsProperties)
-          );
-          props.unshift(componentsProp);
+          )
+          props.unshift(componentsProp)
         }
-        _callPath = callPath;
+        _callPath = callPath
       }
     }
-  });
+  })
   if (_callPath) {
-    const exportDefaultDc = t.exportDefaultDeclaration(_callPath.node);
-    _callPath.parentPath.replaceWith(exportDefaultDc);
+    const exportDefaultDc = t.exportDefaultDeclaration(_callPath.node)
+    _callPath.parentPath.replaceWith(exportDefaultDc)
   }
-  return generate(ast).code;
-};
+  return generate(ast).code
+}
 // 要绑定this使用
 h.convertUsingComponents = function(usingComponents) {
-  const { rootContext, context } = this;
-  const components = [];
+  const { rootContext, context } = this
+  const components = []
   for (let name in usingComponents) {
-    let comPath = usingComponents[name];
+    let comPath = usingComponents[name]
     if (path.isAbsolute(comPath)) {
-      const entryAbsolutePath = path.dirname(path.join(rootContext, entryPath));
-      const comAbsolutePath = path.join(entryAbsolutePath, comPath);
-      comPath = path.relative(context, comAbsolutePath);
+      const entryAbsolutePath = path.dirname(path.join(rootContext, entryPath))
+      const comAbsolutePath = path.join(entryAbsolutePath, comPath)
+      comPath = path.relative(context, comAbsolutePath)
     }
     components.push({
       name,
       comPath: comPath
-    });
+    })
   }
-  return components;
-};
-module.exports = h;
+  return components
+}
+module.exports = h

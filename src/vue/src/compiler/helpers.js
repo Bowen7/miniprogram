@@ -3,43 +3,60 @@
 import { emptyObject } from 'shared/util'
 import { parseFilters } from './parser/filter-parser'
 
-type Range = { start?: number, end?: number };
+type Range = { start?: number, end?: number }
 
 /* eslint-disable no-unused-vars */
-export function baseWarn (msg: string, range?: Range) {
+export function baseWarn(msg: string, range?: Range) {
   console.error(`[Vue compiler]: ${msg}`)
 }
 /* eslint-enable no-unused-vars */
 
-export function pluckModuleFunction<F: Function> (
+export function pluckModuleFunction<F: Function>(
   modules: ?Array<Object>,
   key: string
 ): Array<F> {
-  return modules
-    ? modules.map(m => m[key]).filter(_ => _)
-    : []
+  return modules ? modules.map(m => m[key]).filter(_ => _) : []
 }
 
-export function addProp (el: ASTElement, name: string, value: string, range?: Range, dynamic?: boolean) {
-  (el.props || (el.props = [])).push(rangeSetItem({ name, value, dynamic }, range))
+export function addProp(
+  el: ASTElement,
+  name: string,
+  value: string,
+  range?: Range,
+  dynamic?: boolean
+) {
+  ;(el.props || (el.props = [])).push(
+    rangeSetItem({ name, value, dynamic }, range)
+  )
   el.plain = false
 }
 
-export function addAttr (el: ASTElement, name: string, value: any, range?: Range, dynamic?: boolean) {
+export function addAttr(
+  el: ASTElement,
+  name: string,
+  value: any,
+  range?: Range,
+  dynamic?: boolean
+) {
   const attrs = dynamic
-    ? (el.dynamicAttrs || (el.dynamicAttrs = []))
-    : (el.attrs || (el.attrs = []))
+    ? el.dynamicAttrs || (el.dynamicAttrs = [])
+    : el.attrs || (el.attrs = [])
   attrs.push(rangeSetItem({ name, value, dynamic }, range))
   el.plain = false
 }
 
 // add a raw attr (use this in preTransforms)
-export function addRawAttr (el: ASTElement, name: string, value: any, range?: Range) {
+export function addRawAttr(
+  el: ASTElement,
+  name: string,
+  value: any,
+  range?: Range
+) {
   el.attrsMap[name] = value
   el.attrsList.push(rangeSetItem({ name, value }, range))
 }
 
-export function addDirective (
+export function addDirective(
   el: ASTElement,
   name: string,
   rawName: string,
@@ -49,24 +66,31 @@ export function addDirective (
   modifiers: ?ASTModifiers,
   range?: Range
 ) {
-  (el.directives || (el.directives = [])).push(rangeSetItem({
-    name,
-    rawName,
-    value,
-    arg,
-    isDynamicArg,
-    modifiers
-  }, range))
+  ;(el.directives || (el.directives = [])).push(
+    rangeSetItem(
+      {
+        name,
+        rawName,
+        value,
+        arg,
+        isDynamicArg,
+        modifiers
+      },
+      range
+    )
+  )
   el.plain = false
 }
 
-function prependModifierMarker (symbol: string, name: string, dynamic?: boolean): string {
-  return dynamic
-    ? `_p(${name},"${symbol}")`
-    : symbol + name // mark the event as captured
+function prependModifierMarker(
+  symbol: string,
+  name: string,
+  dynamic?: boolean
+): string {
+  return dynamic ? `_p(${name},"${symbol}")` : symbol + name // mark the event as captured
 }
 
-export function addHandler (
+export function addHandler(
   el: ASTElement,
   name: string,
   value: string,
@@ -80,12 +104,14 @@ export function addHandler (
   // warn prevent and passive modifier
   /* istanbul ignore if */
   if (
-    process.env.NODE_ENV !== 'production' && warn &&
-    modifiers.prevent && modifiers.passive
+    process.env.NODE_ENV !== 'production' &&
+    warn &&
+    modifiers.prevent &&
+    modifiers.passive
   ) {
     warn(
-      'passive and prevent can\'t be used together. ' +
-      'Passive handler can\'t prevent default event.',
+      "passive and prevent can't be used together. " +
+        "Passive handler can't prevent default event.",
       range
     )
   }
@@ -149,23 +175,21 @@ export function addHandler (
   el.plain = false
 }
 
-export function getRawBindingAttr (
-  el: ASTElement,
-  name: string
-) {
-  return el.rawAttrsMap[':' + name] ||
+export function getRawBindingAttr(el: ASTElement, name: string) {
+  return (
+    el.rawAttrsMap[':' + name] ||
     el.rawAttrsMap['v-bind:' + name] ||
     el.rawAttrsMap[name]
+  )
 }
 
-export function getBindingAttr (
+export function getBindingAttr(
   el: ASTElement,
   name: string,
   getStatic?: boolean
 ): ?string {
   const dynamicValue =
-    getAndRemoveAttr(el, ':' + name) ||
-    getAndRemoveAttr(el, 'v-bind:' + name)
+    getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name)
   if (dynamicValue != null) {
     return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
@@ -180,12 +204,13 @@ export function getBindingAttr (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
-export function getAndRemoveAttr (
+export function getAndRemoveAttr(
   el: ASTElement,
   name: string,
   removeFromMap?: boolean
 ): ?string {
   let val
+  const mustacheReg = /{{(.*)}}/
   if ((val = el.attrsMap[name]) != null) {
     const list = el.attrsList
     for (let i = 0, l = list.length; i < l; i++) {
@@ -198,13 +223,16 @@ export function getAndRemoveAttr (
   if (removeFromMap) {
     delete el.attrsMap[name]
   }
+  if (val) {
+    const inMatch = val.match(mustacheReg)
+    if (inMatch) {
+      val = inMatch[1].trim()
+    }
+  }
   return val
 }
 
-export function getAndRemoveAttrByRegex (
-  el: ASTElement,
-  name: RegExp
-) {
+export function getAndRemoveAttrByRegex(el: ASTElement, name: RegExp) {
   const list = el.attrsList
   for (let i = 0, l = list.length; i < l; i++) {
     const attr = list[i]
@@ -215,10 +243,7 @@ export function getAndRemoveAttrByRegex (
   }
 }
 
-function rangeSetItem (
-  item: any,
-  range?: { start?: number, end?: number }
-) {
+function rangeSetItem(item: any, range?: { start?: number, end?: number }) {
   if (range) {
     if (range.start != null) {
       item.start = range.start
