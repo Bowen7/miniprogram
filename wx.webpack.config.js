@@ -66,11 +66,7 @@ module.exports = {
       wx: [path.resolve(__dirname, 'src/wx'), 'wx'],
       Page: [path.resolve(__dirname, 'src/wx'), 'Page'],
       Component: [path.resolve(__dirname, 'src/wx'), 'Component'],
-      App: [path.resolve(__dirname, 'src/wx'), 'App'],
-      Vue: [
-        path.resolve(__dirname, 'src/vue/src/platforms/web/entry-runtime'),
-        'default'
-      ]
+      App: [path.resolve(__dirname, 'src/wx'), 'App']
     })
   ]
 }

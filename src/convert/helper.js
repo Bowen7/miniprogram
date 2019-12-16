@@ -53,12 +53,11 @@ h.getPagesString = (content, env = 'web') => {
 }
 h.convertJs = (content, components, env = 'web') => {
   const componentsProperties = []
+  let headCode = ''
   components.forEach((component, index) => {
     const { name, comPath } = component
     const componentAliasName = `__Component__${index}__`
-    content =
-      `import ${componentAliasName} from '${comPath}.wxml?env=${env}';` +
-      content
+    headCode += `import ${componentAliasName} from '${comPath}.wxml?env=${env}';\n`
     componentsProperties.push(
       t.objectProperty(t.identifier(name), t.identifier(componentAliasName))
     )
@@ -80,7 +79,9 @@ h.convertJs = (content, components, env = 'web') => {
             t.identifier('components'),
             t.objectExpression(componentsProperties)
           )
-          props.unshift(componentsProp)
+          env === 'worker'
+            ? props.unshift(componentsProp)
+            : (args[0].node.properties = [componentsProp])
         }
         _callPath = callPath
       }
@@ -88,9 +89,13 @@ h.convertJs = (content, components, env = 'web') => {
   })
   if (_callPath) {
     const exportDefaultDc = t.exportDefaultDeclaration(_callPath.node)
+    if (env === 'web') {
+      return headCode + generate(exportDefaultDc).code
+    }
     _callPath.parentPath.replaceWith(exportDefaultDc)
   }
-  return generate(ast).code
+
+  return headCode + generate(ast).code
 }
 // 要绑定this使用
 h.convertUsingComponents = function(usingComponents) {

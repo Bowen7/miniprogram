@@ -18,12 +18,12 @@ worker.postMessage({
 
 template.buildWorker = function(pageString) {
   return `
-  onmessage = function (e) {
-    console.log('Message received from main script')
-    console.log(e)
-  };
-  ${pageString}
-//App({routes});
+onmessage = function (e) {
+  console.log('Message received from main script')
+  console.log(e)
+};
+${pageString}
+App({routes});
   `
 }
 

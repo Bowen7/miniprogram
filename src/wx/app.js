@@ -1,3 +1,4 @@
+import Vue from 'vue'
 const App = ({ routes }) => {
   const AppWrap = {
     data: function() {
