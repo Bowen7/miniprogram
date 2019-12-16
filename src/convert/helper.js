@@ -35,7 +35,7 @@ h.convertFile = (filePath, type) => {
     return ''
   }
 }
-h.getPagesString = content => {
+h.getPagesString = (content, env = 'web') => {
   content = JSON.parse(content)
   const pages = content.pages || []
   let requires = ''
@@ -43,7 +43,7 @@ h.getPagesString = content => {
   pages.forEach((page, index) => {
     const pageName = `__Page__${index}__`
 
-    requires += `import ${pageName} from './${page}.wxml';\n`
+    requires += `import ${pageName} from './${page}.wxml?env=${env}';\n`
     if (index === 0) {
       routes += `"/": { redirect: '/${page}' },\n`
     }
@@ -51,13 +51,13 @@ h.getPagesString = content => {
   })
   return `${requires}\nconst routes={${routes}}`
 }
-h.convertJs = (content, components) => {
+h.convertJs = (content, components, env = 'web') => {
   const componentsProperties = []
   components.forEach((component, index) => {
     const { name, comPath } = component
-    componentAliasName = `__Component__${index}__`
+    const componentAliasName = `__Component__${index}__`
     content =
-      `import ${componentAliasName} from '${comPath}.wxml';console.log(666, ${componentAliasName});` +
+      `import ${componentAliasName} from '${comPath}.wxml?env=${env}';` +
       content
     componentsProperties.push(
       t.objectProperty(t.identifier(name), t.identifier(componentAliasName))

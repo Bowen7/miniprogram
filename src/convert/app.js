@@ -1,5 +1,4 @@
 const path = require('path')
-const fs = require('fs')
 const loaderUtils = require('loader-utils')
 const h = require('./helper')
 const template = require('./template')
@@ -13,9 +12,9 @@ module.exports = function(source) {
   }
   if (this.query) {
     const options = loaderUtils.getOptions(this)
-    if (options && options.type === 'worker') {
+    if (options && options.env === 'worker') {
       const jsonContent = h.convertFile(resourcePath, 'json')
-      const pagesString = h.getPagesString(jsonContent)
+      const pagesString = h.getPagesString(jsonContent, 'worker')
       return template.buildWorker.call(this, pagesString)
     }
   }

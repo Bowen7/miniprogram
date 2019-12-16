@@ -6,7 +6,7 @@ template.buildApp = function(pageString) {
   const { resourcePath } = this
   const basename = path.basename(resourcePath)
   return `
-import Worker from "!!worker-loader!${__dirname}/app.js?type=worker!./${basename}";
+import Worker from "!!worker-loader!${__dirname}/app.js?env=worker!./${basename}";
 ${pageString}
 App({routes});
 const worker = new Worker();
@@ -17,8 +17,6 @@ worker.postMessage({
 }
 
 template.buildWorker = function(pageString) {
-  const { resourcePath } = this
-  const basename = path.basename(resourcePath)
   return `
   onmessage = function (e) {
     console.log('Message received from main script')
@@ -29,8 +27,14 @@ template.buildWorker = function(pageString) {
   `
 }
 
-template.buildComponent = (template, script, style, components) => {
-  script = h.convertJs(script, components)
+template.buildComponent = (
+  template,
+  script,
+  style,
+  components,
+  env = 'web'
+) => {
+  script = h.convertJs(script, components, env)
   return `
 <template>
   ${template}

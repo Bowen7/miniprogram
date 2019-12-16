@@ -23,7 +23,7 @@ const App = ({ routes }) => {
       }
     },
     beforeCreate() {
-      window.addEventListener('hashchange', e => {
+      window.addEventListener('hashchange', () => {
         this.currentRoute = window.location.hash
       })
     },
