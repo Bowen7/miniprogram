@@ -44,9 +44,6 @@ h.getPagesString = (content, env = 'web') => {
     const pageName = `__Page__${index}__`
 
     requires += `import ${pageName} from './${page}.wxml?env=${env}';\n`
-    if (index === 0) {
-      routes += `"/": { redirect: '/${page}' },\n`
-    }
     routes += `"/${page}": { component: ${pageName} },\n`
   })
   return `${requires}\nconst routes={${routes}}`
